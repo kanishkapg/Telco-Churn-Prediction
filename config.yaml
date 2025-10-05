@@ -19,11 +19,11 @@ columns:
   drop_columns: ["customerID"]
   internet_service_columns: ['OnlineSecurity', 'OnlineBackup', 'DeviceProtection', 'TechSupport', 'StreamingTV', 'StreamingMovies']
   nominal_columns: ['gender', 'InternetService', 'PaymentMethod']
+  ordinal_columns: ['Contract', 'TenureGroup', 'InternetService']
   numeric_columns: ['tenure', 'MonthlyCharges', 'TotalCharges']
   columns_to_be_binary: ['Partner', 'Dependents', 'PhoneService', 'MultipleLines', 'PaperlessBilling', 'Churn']
   critical_columns: ['TotalCharges']
   feature_columns:
-    - "customerID"
     - "gender"
     - "SeniorCitizen"
     - "Partner"
@@ -84,12 +84,19 @@ feature_encoding:
       Fiber optic: 2
 
 feature_engineering:
-  add_ons_feature:
+  add_ons:
     enabled: true
     name: "Add-ons"
     source_columns: ['OnlineSecurity', 'OnlineBackup', 'DeviceProtection', 'TechSupport', 'StreamingTV', 'StreamingMovies']
     method: "count_yes"
     description: "Count of 'Yes' values in internet service columns"
+  replacements:
+    - columns_ref: "columns.internet_service_columns"
+      map:
+        "No internet service": "No"
+    - columns: ["MultipleLines"]
+      map:
+        "No phone service": "No"
 
 feature_scaling:
   scaling_type: "minmax"
