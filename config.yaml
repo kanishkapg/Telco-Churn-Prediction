@@ -1,0 +1,199 @@
+# This file contains all the things we define (like hyper-params, data-paths)
+# when we have to change something, we can change it here easily
+
+data_paths:
+  raw_data: 'data/raw/Telco-Customer-Churn.csv'
+  processed_data: 'data/processed/Telco-Customer-Churn-Processed.csv'
+  imputed_data: 'data/processed/Telco-Customer-Churn-Imputed.csv'
+  processed_dir: 'data/processed'
+  artifacts_dir: 'artifacts'
+  data_artifacts_dir: 'artifacts/data'
+  model_artifacts_dir: "artifacts/models"
+  X_train: "artifacts/data/X_train.csv"
+  X_test: "artifacts/data/X_test.csv"
+  y_train: "artifacts/data/y_train.csv"
+  y_test: "artifacts/data/y_test.csv"
+
+columns:
+  target: "Churn"
+  drop_columns: ["customerID"]
+  internet_service_columns: ['OnlineSecurity', 'OnlineBackup', 'DeviceProtection', 'TechSupport', 'StreamingTV', 'StreamingMovies']
+  nominal_columns: ['gender', 'InternetService', 'PaymentMethod']
+  numeric_columns: ['tenure', 'MonthlyCharges', 'TotalCharges']
+  columns_to_be_binary: ['Partner', 'Dependents', 'PhoneService', 'MultipleLines', 'PaperlessBilling', 'Churn']
+  critical_columns: ['TotalCharges']
+  feature_columns:
+    - "customerID"
+    - "gender"
+    - "SeniorCitizen"
+    - "Partner"
+    - "Dependents"
+    - "tenure"
+    - "PhoneService"
+    - "MultipleLines"
+    - "InternetService"
+    - "OnlineSecurity"
+    - "OnlineBackup"
+    - "DeviceProtection"
+    - "TechSupport"
+    - "StreamingTV"
+    - "StreamingMovies"
+    - "Contract"
+    - "PaperlessBilling"
+    - "PaymentMethod"
+    - "MonthlyCharges"
+    - "TotalCharges"
+
+missing_values:
+  strategy: "fill"
+  methods:
+    TotalCharges:
+      strategy: "fill"
+      method: "arbitrary"
+      fill_value: 0
+
+outlier_detection:
+  detection_method: "iqr"
+  handling_method: "remove"
+  z_score_threshold: 3.0
+
+feature_binning:
+  tenure_bins:
+    New: [0, 24]
+    Established: [24, 48]
+    Loyal: [48, 72]
+  tenure_mapping:
+    New: 0
+    Established: 1
+    Loyal: 2
+
+feature_encoding:
+  nominal_columns: ['gender', 'InternetService', 'PaymentMethod']
+  ordinal_mappings:
+    TenureGroup:
+      New: 0
+      Established: 1
+      Loyal: 2
+    Contract:
+      Month-to-month: 0
+      One year: 1
+      Two year: 2
+    InternetService:
+      No: 0
+      DSL: 1
+      Fiber optic: 2
+
+feature_engineering:
+  add_ons_feature:
+    enabled: true
+    name: "Add-ons"
+    source_columns: ['OnlineSecurity', 'OnlineBackup', 'DeviceProtection', 'TechSupport', 'StreamingTV', 'StreamingMovies']
+    method: "count_yes"
+    description: "Count of 'Yes' values in internet service columns"
+
+feature_scaling:
+  scaling_type: "minmax"
+  columns_to_scale: ['MonthlyCharges', 'TotalCharges']
+
+data_splitting:
+  split_type: "simple"
+  test_size: 0.2
+  random_state: 42
+  n_splits: 5
+
+training:
+  default_model_type: "random_forest"
+  default_training_strategy: "cv"
+  cv_folds: 5
+  random_state: 42
+  test_size: 0.2
+  validation_split: 0.2
+  early_stopping_patience: 10
+  max_iterations: 600
+  hyperparameter_tuning:
+    enabled: false
+    search_method: "grid"
+    cv_folds: 5
+    n_iter: 20
+
+model:
+  model_type: "random_forest"
+  training_strategy: "cv"
+  data_path: 'data/raw/Telco-Customer-Churn.csv'
+  model_path: "artifacts/models/random_forest_cv_model.pkl"
+  evaluation_path: "artifacts/evaluation/random_forest_cv_evaluation_report.txt"
+  model_params:
+    n_estimators: 100
+    max_depth: 10
+    random_state: 42
+  model_types:
+    random_forest:
+      n_estimators: 600
+      max_depth: [16, 25]
+      max_features: 'log2'
+      criterion: "entropy"
+    xgboost:
+      n_estimators: 100
+      max_depth: [8, 10]
+      learning_rate: [0.1, 0.3]
+      subsample: 1.0
+      colsample_bytree: 0.4
+    logistic_regression:
+      C: 2
+      max_iter: 1000
+    cat_boost:
+      iterations: 600
+      depth: [12, 16]
+      learning_rate: 0.01
+      l2_leaf_reg: 1
+      auto_class_weights: 'Balanced'
+
+evaluation:
+  metrics:
+    - "accuracy"
+    - "precision"
+    - "recall"
+    - "f1-score"
+  cv_folds: 5
+  random_state: 42
+
+deployment:
+  model_name: "churn_analysis_model"
+  model_version: "1.0.0"
+  api_endpoint: "/predict"
+  batch_size: 1000
+
+inference:
+  model_name: "random_forest_cv_model"
+  data_path: "artifacts/data/X_test.csv"
+  sample_size: 100
+  save_path: "artifacts/predictions/predictions.csv"
+  batch_size: 1000
+  return_proba: true
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(levelname)s - %(message)s"
+  file: "pipeline.log"
+
+mlflow:
+  tracking_uri: "file:./mlruns"  # Local file-based tracking
+  experiment_name: "Zuu Crew Telco Churn Analysis"
+  model_registry_name: "telco_churn_prediction"
+  artifact_path: "model"
+  run_name_prefix: "churn_run"
+  tags:
+    project: "telco_churn_prediction"
+    team: "ml_engineering"
+    environment: "development"
+  autolog: true
+
+environment:
+  experiment_name: "churn_analysis"
+
+pipeline:
+  data_pipeline_name: "data_processing_pipeline"
+  training_pipeline_name: "model_training_pipeline"
+  deployment_pipeline_name: "model_deployment_pipeline"
+  inference_pipeline_name: "inference_pipeline"
+  enable_cache: false
