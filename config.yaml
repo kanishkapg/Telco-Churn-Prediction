@@ -60,8 +60,8 @@ outlier_detection:
 feature_binning:
   tenure_bins:
     New: [0, 24]
-    Established: [24, 48]
-    Loyal: [48, 72]
+    Established: [25, 48]
+    Loyal: [49]
   tenure_mapping:
     New: 0
     Established: 1
