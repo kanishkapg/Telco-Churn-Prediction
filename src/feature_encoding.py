@@ -63,8 +63,45 @@ class OrdinalEncodingStrategy(FeatureEncodingStrategy):
         
     def encode(self, df):
         for column, mapping in self.ordinal_mappings.items():
+            if df[column].dtype == 'object':
+                df[column] = df[column].str.strip()
             df[column] = df[column].map(mapping)
             logging.info(f'Encoded ordinal variable {column} with {len(mapping)} categories')
+        return df
+
+
+class BinaryEncodingStrategy(FeatureEncodingStrategy):
+    """
+    Encodes binary categorical features (e.g., 'Yes'/'No') into numerical format (1/0).
+    """
+    def __init__(self, binary_columns: List[str], positive_value: str = 'Yes', negative_value: str = 'No'):
+        """
+        Initializes the BinaryEncodingStrategy.
+
+        Args:
+            binary_columns (List[str]): List of column names to be encoded.
+            positive_value (str): The string representing the positive class (mapped to 1).
+            negative_value (str): The string representing the negative class (mapped to 0).
+        """
+        self.binary_columns = binary_columns
+        self.mapping = {positive_value: 1, negative_value: 0}
+
+    def encode(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Applies binary encoding to the specified columns.
+
+        Args:
+            df (pd.DataFrame): The input DataFrame.
+
+        Returns:
+            pd.DataFrame: The DataFrame with binary columns encoded.
+        """
+        for column in self.binary_columns:
+            if column in df.columns:
+                df[column] = df[column].map(self.mapping)
+                logging.info(f"Encoded binary variable '{column}'")
+            else:
+                logging.warning(f"Column '{column}' not found in DataFrame. Skipping binary encoding.")
         return df
     
 
@@ -73,7 +110,8 @@ if __name__ == "__main__":
     df = pd.DataFrame({
         'color': ['red', 'blue', 'green', 'blue'],
         'size': ['S', 'M', 'L', 'XL'],
-        'tenure': [5, 15, 30, 45]
+        'tenure': [5, 15, 30, 45],
+        'subscribed': ['Yes', 'No', 'Yes', 'No']
     })
     
     nominal_columns = ['color', 'size']
@@ -84,6 +122,7 @@ if __name__ == "__main__":
             'Loyal': 2
         }
     }
+    binary_columns = ['subscribed']
     
     nominal_encoder = NominalEncodingStrategy(nominal_columns)
     df = nominal_encoder.encode(df)
@@ -91,5 +130,8 @@ if __name__ == "__main__":
     ordinal_encoder = OrdinalEncodingStrategy(ordinal_mappings)
     df['tenure'] = pd.cut(df['tenure'], bins=[-1, 24, 48, float('inf')], labels=['New', 'Established', 'Loyal'])
     df = ordinal_encoder.encode(df)
+    
+    binary_encoder = BinaryEncodingStrategy(binary_columns)
+    df = binary_encoder.encode(df)
     
     print(df)

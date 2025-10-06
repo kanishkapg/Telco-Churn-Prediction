@@ -35,3 +35,17 @@ class OutlierDetector:
         rows_to_remove = outlier_count >= 2
         return df[~rows_to_remove]
         
+
+if __name__ == "__main__":
+    # Example usage
+    data = {
+        'A': [1, 2, 3, 4, 100],
+        'B': [5, 6, 7, 8, -50],
+        'C': [10, 11, 12, 13, 14]
+    }
+    df = pd.DataFrame(data)
+    logging.info(f"Original DataFrame:\n{df}")
+
+    outlier_detector = OutlierDetector(strategy=IQROutlierDetection())
+    cleaned_df = outlier_detector.handle_outliers(df, ['A', 'B'])
+    logging.info(f"DataFrame after outlier removal:\n{cleaned_df}")

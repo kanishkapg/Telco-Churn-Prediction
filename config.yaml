@@ -16,10 +16,10 @@ data_paths:
 
 columns:
   target: "Churn"
-  drop_columns: ["customerID"]
+  drop_columns: ['customerID', 'InternetService', "OnlineSecurity", "OnlineBackup", "DeviceProtection", "TechSupport", "StreamingTV", "StreamingMovies"]
   internet_service_columns: ['OnlineSecurity', 'OnlineBackup', 'DeviceProtection', 'TechSupport', 'StreamingTV', 'StreamingMovies']
-  nominal_columns: ['gender', 'InternetService', 'PaymentMethod']
-  ordinal_columns: ['Contract', 'TenureGroup', 'InternetService']
+  nominal_columns: ['gender', 'PaymentMethod']
+  ordinal_columns: ['Contract', 'tenureBins', 'InternetServices']
   numeric_columns: ['tenure', 'MonthlyCharges', 'TotalCharges']
   columns_to_be_binary: ['Partner', 'Dependents', 'PhoneService', 'MultipleLines', 'PaperlessBilling', 'Churn']
   critical_columns: ['TotalCharges']
@@ -28,16 +28,10 @@ columns:
     - "SeniorCitizen"
     - "Partner"
     - "Dependents"
-    - "tenure"
+    - "tenureBins"
     - "PhoneService"
     - "MultipleLines"
-    - "InternetService"
-    - "OnlineSecurity"
-    - "OnlineBackup"
-    - "DeviceProtection"
-    - "TechSupport"
-    - "StreamingTV"
-    - "StreamingMovies"
+    - "InternetServices"
     - "Contract"
     - "PaperlessBilling"
     - "PaymentMethod"
@@ -68,20 +62,22 @@ feature_binning:
     Loyal: 2
 
 feature_encoding:
-  nominal_columns: ['gender', 'InternetService', 'PaymentMethod']
+  nominal_columns: ['gender', 'PaymentMethod']
+  binary_columns: ['Partner', 'Dependents', 'PhoneService', 'MultipleLines', 'PaperlessBilling', 'Churn']
   ordinal_mappings:
-    TenureGroup:
+    tenureBins:
       New: 0
       Established: 1
       Loyal: 2
+    InternetServices:
+      DSL: 1
+      Fiber optic: 2
+      No Service: 0
     Contract:
       Month-to-month: 0
       One year: 1
       Two year: 2
-    InternetService:
-      No: 0
-      DSL: 1
-      Fiber optic: 2
+    
 
 feature_engineering:
   add_ons:

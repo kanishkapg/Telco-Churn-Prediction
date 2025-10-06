@@ -96,7 +96,8 @@ class FillMissingValuesStrategy(MissingValueHandlingStrategy):
                 raise ValueError(f"Unsupported fill method: {self.fill_method}")
             
             n_missing_before = df_filled[col].isnull().sum()
-            df_filled[col].fillna(fill_value, inplace=True)
+            # Avoid chained assignment with inplace=True to prevent FutureWarning
+            df_filled[col] = df_filled[col].fillna(fill_value)
             n_missing_after = df_filled[col].isnull().sum()
             logging.info(
                 f"Filled {n_missing_before - n_missing_after} missing values in column '{col}' using method '{self.fill_method}'"

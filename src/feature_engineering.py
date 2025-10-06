@@ -88,7 +88,7 @@ if __name__ == "__main__":
 
     # Build replacements dynamically for all source_cols in aggregation_configs
     replacements = {
-        #'MultipleLines': {'No phone service': 'No'},
+        'MultipleLines': {'No phone service': 'No'},
         **{col: {'No internet service': 'No'} for col in internet_service_columns}
     }
 
