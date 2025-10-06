@@ -6,6 +6,7 @@ from datetime import datetime
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBClassifier
+from catboost import CatBoostClassifier
 
 class BaseModelBuilder(ABC):
     """
@@ -79,6 +80,25 @@ class XGBoostModelBuilder(BaseModelBuilder):
     def build_model(self):
         self.model = XGBClassifier(**self.model_params)
         return self.model
+
+
+class CatBoostModelBuilder(BaseModelBuilder):
+    def __init__(self, **kwargs):
+        default_params = {
+            'iterations': 600,
+            'depth': 12,
+            'learning_rate': 0.01,
+            'l2_leaf_reg': 1,
+            'auto_class_weights': 'Balanced',
+            'random_state': 42,
+            'verbose': False
+        }
+        default_params.update(kwargs)
+        super().__init__('CatBoost', **default_params)
+
+    def build_model(self):
+        self.model = CatBoostClassifier(**self.model_params)
+        return self.model
     
 # rf = RandomForestModelBuilder()
 # rf_model = rf.build_model()
@@ -91,12 +111,16 @@ class XGBoostModelBuilder(BaseModelBuilder):
 if __name__ == "__main__":
     lr = LogisticRegressionModelBuilder()
     lr_model = lr.build_model()
-    print(lr_model)
+    print("Logistic Regression:", lr_model)
 
     rf = RandomForestModelBuilder()
     rf_model = rf.build_model()
-    print(rf_model)
+    print("Random Forest:", rf_model)
 
     xgb = XGBoostModelBuilder()
     xgb_model = xgb.build_model()
-    print(xgb_model)
+    print("XGBoost:", xgb_model)
+
+    cb = CatBoostModelBuilder()
+    cb_model = cb.build_model()
+    print("CatBoost:", cb_model)
